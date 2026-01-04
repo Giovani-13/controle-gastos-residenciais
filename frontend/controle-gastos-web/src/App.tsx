@@ -1,13 +1,63 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import PessoaPage from "./Pages/Pessoa";
 import CategoriaPage from "./Pages/Categoria";
 import TransacoesPage from "./Pages/Transacoes";
 import TotaisPessoaPage from "./Pages/TotaisPessoa";
+import { API_URL } from "./Services/api";
 
 type Pagina = "pessoas" | "categorias" | "transacoes" | "totais";
+type ApiStatus = "waking" | "ready" | "error";
 
 export default function App() {
   const [pagina, setPagina] = useState<Pagina>("pessoas");
+  const [apiStatus, setApiStatus] = useState<ApiStatus>("waking");
+
+  // Acorda a API quando o app abre (Render Free pode estar "dormindo")
+  useEffect(() => {
+    const API_BASE = API_URL.replace(/\/api\/?$/, ""); // remove /api do final, se existir
+    let cancelled = false;
+
+    async function wakeApi() {
+      setApiStatus("waking");
+
+      const attempts = [0, 1500, 2500, 4000]; // tenta algumas vezes
+      for (let i = 0; i < attempts.length; i++) {
+        if (cancelled) return;
+
+        if (attempts[i] > 0) {
+          await new Promise((r) => setTimeout(r, attempts[i]));
+        }
+
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 10000);
+
+          const res = await fetch(`${API_BASE}/health`, {
+            method: "GET",
+            cache: "no-store",
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeout);
+
+          if (res.ok) {
+            if (!cancelled) setApiStatus("ready");
+            return;
+          }
+        } catch {
+          // tenta de novo
+        }
+      }
+
+      if (!cancelled) setApiStatus("error");
+    }
+
+    wakeApi();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const titulo = useMemo(() => {
     if (pagina === "pessoas") return "Pessoas";
@@ -31,6 +81,12 @@ export default function App() {
       </nav>
 
       <main className="container my-4">
+        {apiStatus === "error" && (
+          <div className="alert alert-warning py-2 mb-3" role="alert">
+            Não foi possível conectar na API agora. Atualize a página em alguns segundos.
+          </div>
+        )}
+
         <div className="p-4 app-hero rounded-4 mb-4">
           <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
             <div>
