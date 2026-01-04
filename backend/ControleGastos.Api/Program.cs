@@ -45,7 +45,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontDev", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+            "https://controle-gastos-web.onrender.com",
+            "http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
