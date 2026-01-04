@@ -121,5 +121,26 @@ Campos:
 - As regras de negócio foram concentradas na camada de Services.
 - O projeto foi desenvolvido priorizando clareza, organização e aderência às regras solicitadas.
 
+---
+
+## 🔗 Links do projeto (Render)
+
+- **Aplicação (Front-end):**  
+  https://controle-gastos-web.onrender.com
+
+- **API (Back-end):**  
+  https://controle-gastos-residenciais.onrender.com
+
+- **Swagger (documentação da API):**  
+  https://controle-gastos-residenciais.onrender.com/swagger/index.html
+
+### Observação importante (Render Free)
+O back-end pode “dormir” quando fica um tempo sem acesso.  
+Por isso, **no primeiro carregamento** a aplicação pode demorar alguns segundos para responder.
+
+✅ Para facilitar o teste, o front faz uma chamada automática para o endpoint **`/health`** ao abrir o site.
+Enquanto a API está iniciando, aparece uma mensagem informando que o servidor está sendo inicializado.
+
+
 
 
