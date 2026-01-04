@@ -28,7 +28,7 @@ import {
  *
  * Assim você não precisa recompilar pra mudar a URL.
  */
-const API_URL = 'https://controle-gastos-residenciais.onrender.com';
+const API_URL = 'https://controle-gastos-residenciais.onrender.com/api';
 
 /**
  * Lê a resposta do servidor e lança erro com uma mensagem útil.
