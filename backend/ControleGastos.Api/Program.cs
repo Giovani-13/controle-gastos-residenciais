@@ -80,6 +80,9 @@ app.UseCors("FrontDev");
 
 app.UseAuthorization();
 
+// Endpoint simples para "acordar" o serviço (Render Free) e checar saúde
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
 app.MapControllers();
 
 app.Run();
