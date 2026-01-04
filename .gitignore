@@ -1,0 +1,31 @@
+# --- Front-end ---
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Back-end (.NET) ---
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+
+# --- SQLite (não subir o banco gerado) ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- OS / Editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.vs/
+
+# --- Arquivos compactados ---
+*.zip
+
