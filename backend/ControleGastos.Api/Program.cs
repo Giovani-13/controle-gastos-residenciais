@@ -13,43 +13,35 @@ var dbPath = Path.Combine(builder.Environment.ContentRootPath, "controle_gastos.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
-
 // =========================
 // Controllers + JSON options
 // =========================
 builder.Services.AddControllers()
     .AddJsonOptions(opt =>
     {
-        // Retorna JSON em camelCase (ex.: pessoaId, totalGeral, etc.)
         opt.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
-        // Aceita tanto "PessoaId" quanto "pessoaId" no JSON recebido
         opt.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-
-        // Permite enviar/receber enums como string:
-        // Ex.: "despesa", "receita", "ambas"
         opt.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
         );
-
-        // Evita erro de "A possible object cycle was detected"
-        // quando existe navegação circular (Pessoa -> Transacoes -> Pessoa)
-        opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
 // =========================
-// CORS (React Vite)
+// CORS
 // =========================
-// Permite que o front em http://localhost:5173 acesse a API sem bloqueio do browser.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontDev", policy =>
     {
-        policy.WithOrigins(
-            "https://controle-gastos-web.onrender.com",
-            "http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy
+            .WithOrigins(
+                "https://controle-gastos-web.onrender.com", // Front no Render
+                "http://localhost:5173",                   // Vite local
+                "http://localhost:3000"                    // opcional
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -62,29 +54,13 @@ builder.Services.AddSwaggerGen();
 // =========================
 // Services (DI)
 // =========================
-// OBS: você tinha PessoaService duplicado e faltava CategoriaService.
 builder.Services.AddScoped<PessoaService>();
 builder.Services.AddScoped<CategoriaService>();
 builder.Services.AddScoped<TransacaoService>();
 
-
-// -------------------- CORS --------------------
-// Permite que o front (Vite) em http://localhost:5173 acesse a API.
-// (Sem isso, o navegador bloqueia e aparece "Failed to fetch")
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontDev", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5173", "https://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
-
 var app = builder.Build();
 
-// Em desenvolvimento, garante que o banco esteja atualizado com as migrations
+// Garante migrations (local e Render também pode rodar, sem problema)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -94,11 +70,8 @@ using (var scope = app.Services.CreateScope())
 // =========================
 // Pipeline HTTP
 // =========================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
