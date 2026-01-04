@@ -81,9 +81,15 @@ export default function App() {
       </nav>
 
       <main className="container my-4">
+        {apiStatus === "waking" && (
+          <div className="alert alert-info py-2 mb-3" role="alert">
+            Inicializando o servidor... na primeira vez pode levar alguns segundos.
+          </div>
+        )}
+
         {apiStatus === "error" && (
           <div className="alert alert-warning py-2 mb-3" role="alert">
-            Não foi possível conectar na API agora. Atualize a página em alguns segundos.
+            Não foi possível conectar na API agora. Aguarde alguns segundos e atualize a página.
           </div>
         )}
 
