@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ControleGastos.Api.Models;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace ControleGastos.Api.Data
 {
@@ -27,8 +28,8 @@ namespace ControleGastos.Api.Data
             // Garante que o SQLite armazene decimal como REAL,
             // permitindo SUM/AVG e outros agregados no banco.
             modelBuilder.Entity<Transacao>()
-                .Property(t => t.Valor)
-                .HasColumnType("REAL");
+            .Property(t => t.Valor)
+            .HasColumnType(Database.IsNpgsql() ? "numeric(18,2)" : "REAL");
 
             // Ao excluir uma pessoa, excluir automaticamente suas transações
             modelBuilder.Entity<Pessoa>()
