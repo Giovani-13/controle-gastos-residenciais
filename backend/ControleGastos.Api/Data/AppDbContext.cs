@@ -25,9 +25,20 @@ namespace ControleGastos.Api.Data
             modelBuilder.Entity<Transacao>().ToTable("Transacao");
             modelBuilder.Entity<Categoria>().ToTable("Categoria");
 
+
+            // Configura os IDs como auto-incrementais
             modelBuilder.Entity<Pessoa>()
-            .Property(p => p.Id)
-            .ValueGeneratedOnAdd();
+                .Property(p => p.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Categoria>()
+                .Property(c => c.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Transacao>()
+                .Property(t => t.Id)
+                .ValueGeneratedOnAdd();
+
 
             // Garante que o SQLite armazene decimal como REAL,
             // permitindo SUM/AVG e outros agregados no banco.
