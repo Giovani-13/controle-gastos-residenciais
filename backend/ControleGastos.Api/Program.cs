@@ -48,6 +48,7 @@ static string ConvertPostgresUrlToNpgsql(string conn)
     var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
     var host = uri.Host;
     var port = uri.Port;
+    if (port <= 0) port = 5432;
     var database = uri.AbsolutePath.Trim('/');
 
     var query = uri.Query.TrimStart('?');
