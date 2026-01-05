@@ -7,11 +7,55 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // =========================
-// Banco de dados (SQLite)
+// Banco de dados
+// Dev: SQLite | Prod: PostgreSQL (Render)
 // =========================
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "controle_gastos.db");
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
+if (builder.Environment.IsDevelopment())
+{
+    // Localhost (SQLite)
+    var dbPath = Path.Combine(builder.Environment.ContentRootPath, "controle_gastos.db");
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite($"Data Source={dbPath}"));
+}
+else
+{
+    // Render/Production (Postgres)
+    var conn = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    if (string.IsNullOrWhiteSpace(conn))
+        throw new Exception("ConnectionStrings__DefaultConnection não configurada.");
+
+    conn = ConvertPostgresUrlToNpgsql(conn);
+
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(conn));
+}
+
+// Helper (pode ficar no final do Program.cs)
+static string ConvertPostgresUrlToNpgsql(string conn)
+{
+    if (conn.Contains("Host=", StringComparison.OrdinalIgnoreCase))
+        return conn;
+
+    if (!(conn.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+          conn.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase)))
+        return conn;
+
+    var uri = new Uri(conn);
+    var userInfo = uri.UserInfo.Split(':', 2);
+
+    var username = Uri.UnescapeDataString(userInfo[0]);
+    var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+    var host = uri.Host;
+    var port = uri.Port;
+    var database = uri.AbsolutePath.Trim('/');
+
+    var query = uri.Query.TrimStart('?');
+    var extra = string.IsNullOrWhiteSpace(query) ? "" : ";" + query.Replace("&", ";");
+
+    return $"Host={host};Port={port};Database={database};Username={username};Password={password}{extra}";
+}
+
 
 // =========================
 // Controllers + JSON options
