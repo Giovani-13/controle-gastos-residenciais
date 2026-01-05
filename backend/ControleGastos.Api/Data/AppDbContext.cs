@@ -25,6 +25,10 @@ namespace ControleGastos.Api.Data
             modelBuilder.Entity<Transacao>().ToTable("Transacao");
             modelBuilder.Entity<Categoria>().ToTable("Categoria");
 
+            modelBuilder.Entity<Pessoa>()
+            .Property(p => p.Id)
+            .ValueGeneratedOnAdd();
+
             // Garante que o SQLite armazene decimal como REAL,
             // permitindo SUM/AVG e outros agregados no banco.
             modelBuilder.Entity<Transacao>()
